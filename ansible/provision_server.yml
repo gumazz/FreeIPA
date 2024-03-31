@@ -1,0 +1,49 @@
+- hosts: ipa.otus.lan
+  become: yes
+  tasks:
+
+  - name: Set up timezone
+    timezone:
+      name: "Europe/Moscow"
+
+  - name: install soft
+    yum:
+      name:
+        - chrony
+      state: present
+      update_cache: true
+
+  - name: disable firewalld
+    service:
+      name: firewalld
+      state: stopped
+      enabled: false
+  
+  - name: disable SElinux
+    selinux:
+      state: disabled
+  
+  - name: disable SElinux now
+    shell: setenforce 0
+
+  - name: enable chrony
+    service:
+      name: chronyd
+      state: restarted
+      enabled: true
+
+  - name: change /etc/hosts
+    template:
+      src: hosts.j2
+      dest: /etc/hosts
+      owner: root
+      group: root
+      mode: 0644
+            
+  - name: install soft
+    yum:
+      name:
+        - "@idm:DL1"
+        - ipa-server
+      state: present
+      update_cache: true
